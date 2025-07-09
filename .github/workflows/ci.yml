@@ -1,0 +1,21 @@
+name: Guardrail-CI Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-guardrail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: pip install typer rich requests pyyaml jinja2
+      - name: Run Guardrail
+        run: python -m guardrail_ci.cli test --endpoint https://dummy --auth-key dummy

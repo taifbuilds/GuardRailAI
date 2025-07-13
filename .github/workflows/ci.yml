@@ -18,4 +18,4 @@ jobs:
       - name: Install dependencies
         run: pip install typer rich requests pyyaml jinja2
       - name: Run Guardrail
-        run: python -m guardrail_ci.cli test --endpoint https://dummy --auth-key dummy
+        run: python -m guardrail_ai test --adapter openai --endpoint https://dummy --auth-key dummy --prompt "test prompt"

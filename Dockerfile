@@ -8,4 +8,4 @@ RUN pip install typer rich requests pyyaml jinja2
 
 COPY . .
 
-ENTRYPOINT ["python", "-m", "guardrail_ci.cli"]
+ENTRYPOINT ["python", "-m", "guardrail_ai"]

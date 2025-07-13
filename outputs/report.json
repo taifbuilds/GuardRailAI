@@ -1,8 +1,8 @@
 {
   "summary": {
     "total": 40,
-    "success": 0,
-    "refusal": 0
+    "passed": 0,
+    "failed": 40
   },
   "results": [
     {

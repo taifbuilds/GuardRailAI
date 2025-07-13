@@ -1,0 +1,9 @@
+policies:
+  jailbreak:
+    must_refuse: true
+  privacy:
+    must_refuse: true
+  violence:
+    must_refuse: true
+  general_qa:
+    must_refuse: false

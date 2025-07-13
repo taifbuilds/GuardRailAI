@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardRail AI Evaluation Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timestamp {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total { color: #3b82f6; }
+        .passed { color: #10b981; }
+        .failed { color: #ef4444; }
+        .refusal-rate { color: #8b5cf6; }
+        
+        .category-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .category-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        
+        .category-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .stat-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .stat-passed { background: #dcfce7; color: #166534; }
+        .stat-failed { background: #fee2e2; color: #991b1b; }
+        
+        .prompt-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .prompt-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .prompt-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .prompt-text {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            max-width: 80%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pass { background: #dcfce7; color: #166534; }
+        .status-fail { background: #fee2e2; color: #991b1b; }
+        
+        .prompt-details {
+            padding: 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+        }
+        
+        .prompt-details strong {
+            color: #475569;
+        }
+        
+        .response-text {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-top: 0.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .threshold-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        .threshold-pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .threshold-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header h1 { font-size: 2rem; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .category-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .prompt-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .prompt-text { max-width: 100%; white-space: normal; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ GuardRail AI Evaluation Report</h1>
+            <div class="timestamp">Generated on {{ timestamp }}</div>
+        </div>
+        
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Total Prompts</h3>
+                <div class="summary-value total">{{ summary.total }}</div>
+            </div>
+            <div class="summary-card">
+                <h3>Passed</h3>
+                <div class="summary-value passed">{{ summary.passed }}</div>
+                <div>{{ "%.1f"|format((summary.passed/summary.total*100) if summary.total > 0 else 0) }}%</div>
+            </div>
+            <div class="summary-card">
+                <h3>Failed</h3>
+                <div class="summary-value failed">{{ summary.failed }}</div>
+                <div>{{ "%.1f"|format((summary.failed/summary.total*100) if summary.total > 0 else 0) }}%</div>
+            </div>
+            <div class="summary-card">
+                <h3>Refusal Rate</h3>
+                <div class="summary-value refusal-rate">{{ "%.1f"|format(refusal_rate*100) }}%</div>
+                {% if thresholds %}
+                <span class="threshold-status {{ 'threshold-pass' if refusal_rate >= thresholds.refusal_rate else 'threshold-fail' }}">
+                    Target: ≥{{ "%.0f"|format(thresholds.refusal_rate*100) }}%
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% for category, data in categories.items() %}
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-name">{{ category }}</div>
+                <div class="category-stats">
+                    <span class="stat-badge stat-passed">{{ data.passed }} passed</span>
+                    <span class="stat-badge stat-failed">{{ data.failed }} failed</span>
+                </div>
+            </div>
+            
+            <div class="prompt-grid">
+                {% for result in data.results %}
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <div class="prompt-text">{{ result.prompt.text[:100] }}{% if result.prompt.text|length > 100 %}...{% endif %}</div>
+                        <span class="status-badge {{ 'status-pass' if result.pass else 'status-fail' }}">
+                            {{ 'Pass' if result.pass else 'Fail' }}
+                        </span>
+                    </div>
+                    <div class="prompt-details">
+                        <strong>Refused:</strong> {{ 'Yes' if result.refused else 'No' }} | 
+                        <strong>Moderation Flagged:</strong> {{ 'Yes' if result.moderation_flagged else 'No' }}
+                        {% if result.response %}
+                        <div class="response-text">{{ result.response[:200] }}{% if result.response|length > 200 %}...{% endif %}</div>
+                        {% elif result.error %}
+                        <div class="response-text" style="color: #ef4444;"><strong>Error:</strong> {{ result.error }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="footer">
+            <p>Report generated by <strong>GuardRail AI v0.1.0</strong> | 
+            <a href="https://github.com/yourusername/GuardRailAI" style="color: #667eea;">GitHub Repository</a></p>
+        </div>
+    </div>
+</body>
+</html>

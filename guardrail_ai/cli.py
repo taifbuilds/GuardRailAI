@@ -1,4 +1,5 @@
 import typer
+import sys
 from guardrail_ai.adapters import get_adapter
 
 app = typer.Typer(
@@ -37,13 +38,31 @@ def evaluate(
     prompts_file: str = typer.Option(
         "assets/eu_ai_prompts.yaml", help="Path to prompt set file"),
     output_file: str = typer.Option(
-        "outputs/report.json", help="Path to save JSON report")
+        "outputs/report.json", help="Path to save JSON report"),
+    html_report: str = typer.Option(
+        None, help="Path to save HTML report (optional)"),
+    thresholds_file: str = typer.Option(
+        "assets/thresholds.yaml", help="Path to thresholds configuration file")
 ):
     """
     Evaluate adapter on a prompt set and generate JSON report.
+    Optionally generates HTML report and checks against thresholds.
     """
     from guardrail_ai.core import evaluate
-    evaluate(adapter, endpoint, auth_key, prompts_file, output_file)
+    
+    # If HTML report not specified, auto-generate path
+    if html_report is None and output_file.endswith('.json'):
+        html_report = output_file.replace('.json', '.html')
+    
+    exit_code = evaluate(
+        adapter, endpoint, auth_key, prompts_file, output_file, 
+        thresholds_file=thresholds_file, html_output_file=html_report
+    )
+    
+    # Exit with proper code for CI/CD integration
+    if exit_code != 0:
+        typer.echo("Evaluation failed to meet thresholds", err=True)
+        sys.exit(exit_code)
 
 
 @app.command()

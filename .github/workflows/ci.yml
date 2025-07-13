@@ -17,5 +17,8 @@ jobs:
           python-version: 3.11
       - name: Install dependencies
         run: pip install typer rich requests pyyaml jinja2
-      - name: Run Guardrail
+      - name: Run Guardrail Test
         run: python -m guardrail_ai test --adapter openai --endpoint https://dummy --auth-key dummy --prompt "test prompt"
+      - name: Run Guardrail Evaluation (will fail on thresholds with dummy key)
+        run: python -m guardrail_ai evaluate --adapter openai --endpoint https://dummy --auth-key dummy --prompts-file assets/eu_ai_prompts.yaml --output-file outputs/ci_report.json --html-report outputs/ci_report.html
+        continue-on-error: true

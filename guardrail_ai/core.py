@@ -115,7 +115,13 @@ def generate_html_report(report_data: dict, output_file: str, thresholds: dict =
         total_prompts = 0
         
         for result in results:
-            category = result.get("prompt", {}).get("category", "unknown")
+            # Safely get category with defensive checks
+            prompt = result.get("prompt", {})
+            if isinstance(prompt, dict):
+                category = prompt.get("category", "unknown")
+            else:
+                category = "unknown"
+                
             categories[category]["results"].append(result)
             
             if result.get("pass", False):
@@ -133,13 +139,18 @@ def generate_html_report(report_data: dict, output_file: str, thresholds: dict =
         
         # Setup Jinja2 environment
         template_dir = Path(__file__).parent.parent / "templates"
+        if not template_dir.exists():
+            print(f"Error: Template directory not found at {template_dir}")
+            return False
+            
         env = Environment(loader=FileSystemLoader(template_dir))
         template = env.get_template("report.html")
         
-        # Render template
+        # Render template with proper context
         html_content = template.render(
             summary=summary,
-            categories=dict(categories),
+            results=results,
+            categories=dict(categories) if categories else None,
             refusal_rate=refusal_rate,
             thresholds=thresholds,
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -154,6 +165,8 @@ def generate_html_report(report_data: dict, output_file: str, thresholds: dict =
         
     except Exception as e:
         print(f"Error generating HTML report: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 

@@ -137,10 +137,24 @@
         .prompt-text {
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 0.9rem;
-            max-width: 80%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            max-width: 70%;
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .prompt-text-full {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            max-height: 120px;
+            overflow-y: auto;
         }
         
         .status-badge {
@@ -171,8 +185,24 @@
             border: 1px solid #e2e8f0;
             margin-top: 0.5rem;
             font-family: 'Monaco', 'Menlo', monospace;
-            max-height: 100px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            max-height: 150px;
             overflow-y: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .error-text {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+            margin-top: 0.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
         }
         
         .footer {
@@ -220,33 +250,34 @@
         <div class="summary-grid">
             <div class="summary-card">
                 <h3>Total Prompts</h3>
-                <div class="summary-value total">{{ summary.total }}</div>
+                <div class="summary-value total">{{ summary.total or 0 }}</div>
             </div>
             <div class="summary-card">
                 <h3>Passed</h3>
-                <div class="summary-value passed">{{ summary.passed }}</div>
+                <div class="summary-value passed">{{ summary.passed or 0 }}</div>
                 <div>{{ "%.1f"|format((summary.passed/summary.total*100) if summary.total > 0 else 0) }}%</div>
             </div>
             <div class="summary-card">
                 <h3>Failed</h3>
-                <div class="summary-value failed">{{ summary.failed }}</div>
+                <div class="summary-value failed">{{ summary.failed or 0 }}</div>
                 <div>{{ "%.1f"|format((summary.failed/summary.total*100) if summary.total > 0 else 0) }}%</div>
             </div>
             <div class="summary-card">
                 <h3>Refusal Rate</h3>
-                <div class="summary-value refusal-rate">{{ "%.1f"|format(refusal_rate*100) }}%</div>
-                {% if thresholds %}
-                <span class="threshold-status {{ 'threshold-pass' if refusal_rate >= thresholds.refusal_rate else 'threshold-fail' }}">
+                <div class="summary-value refusal-rate">{{ "%.1f"|format((refusal_rate or 0)*100) }}%</div>
+                {% if thresholds and thresholds.refusal_rate %}
+                <span class="threshold-status {{ 'threshold-pass' if (refusal_rate or 0) >= thresholds.refusal_rate else 'threshold-fail' }}">
                     Target: ≥{{ "%.0f"|format(thresholds.refusal_rate*100) }}%
                 </span>
                 {% endif %}
             </div>
         </div>
         
+        {% if categories %}
         {% for category, data in categories.items() %}
         <div class="category-section">
             <div class="category-header">
-                <div class="category-name">{{ category }}</div>
+                <div class="category-name">{{ category.title() }}</div>
                 <div class="category-stats">
                     <span class="stat-badge stat-passed">{{ data.passed }} passed</span>
                     <span class="stat-badge stat-failed">{{ data.failed }} failed</span>
@@ -257,18 +288,39 @@
                 {% for result in data.results %}
                 <div class="prompt-card">
                     <div class="prompt-header">
-                        <div class="prompt-text">{{ result.prompt.text[:100] }}{% if result.prompt.text|length > 100 %}...{% endif %}</div>
-                        <span class="status-badge {{ 'status-pass' if result.pass else 'status-fail' }}">
-                            {{ 'Pass' if result.pass else 'Fail' }}
+                        <div class="prompt-text">
+                            {% if result.prompt and result.prompt.text %}
+                                {{ result.prompt.text[:80] }}{% if result.prompt.text|length > 80 %}...{% endif %}
+                            {% else %}
+                                <em>No prompt text available</em>
+                            {% endif %}
+                        </div>
+                        <span class="status-badge {{ 'status-pass' if result.get('pass', False) else 'status-fail' }}">
+                            {{ 'Pass' if result.get('pass', False) else 'Fail' }}
                         </span>
                     </div>
                     <div class="prompt-details">
-                        <strong>Refused:</strong> {{ 'Yes' if result.refused else 'No' }} | 
-                        <strong>Moderation Flagged:</strong> {{ 'Yes' if result.moderation_flagged else 'No' }}
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Refused:</strong> {{ 'Yes' if result.get('refused', False) else 'No' }} | 
+                            <strong>Moderation Flagged:</strong> {{ 'Yes' if result.get('moderation_flagged', False) else 'No' }}
+                        </div>
+                        
+                        {% if result.prompt and result.prompt.text %}
+                        <div class="prompt-text-full">
+                            <strong>Full Prompt:</strong><br>
+                            {{ result.prompt.text }}
+                        </div>
+                        {% endif %}
+                        
                         {% if result.response %}
-                        <div class="response-text">{{ result.response[:200] }}{% if result.response|length > 200 %}...{% endif %}</div>
-                        {% elif result.error %}
-                        <div class="response-text" style="color: #ef4444;"><strong>Error:</strong> {{ result.error }}</div>
+                        <div class="response-text">
+                            <strong>Model Response:</strong><br>
+                            {{ result.response }}
+                        </div>
+                        {% elif result.get('error') %}
+                        <div class="error-text">
+                            <strong>Error:</strong> {{ result.error }}
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -276,6 +328,61 @@
             </div>
         </div>
         {% endfor %}
+        {% else %}
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-name">All Results</div>
+                <div class="category-stats">
+                    <span class="stat-badge stat-passed">{{ summary.passed or 0 }} passed</span>
+                    <span class="stat-badge stat-failed">{{ summary.failed or 0 }} failed</span>
+                </div>
+            </div>
+            
+            <div class="prompt-grid">
+                {% for result in results %}
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <div class="prompt-text">
+                            {% if result.prompt and result.prompt.text %}
+                                {{ result.prompt.text[:80] }}{% if result.prompt.text|length > 80 %}...{% endif %}
+                            {% else %}
+                                <em>No prompt text available</em>
+                            {% endif %}
+                        </div>
+                        <span class="status-badge {{ 'status-pass' if result.get('pass', False) else 'status-fail' }}">
+                            {{ 'Pass' if result.get('pass', False) else 'Fail' }}
+                        </span>
+                    </div>
+                    <div class="prompt-details">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Category:</strong> {{ result.prompt.category.title() if result.prompt and result.prompt.category else 'Unknown' }} | 
+                            <strong>Refused:</strong> {{ 'Yes' if result.get('refused', False) else 'No' }} | 
+                            <strong>Moderation Flagged:</strong> {{ 'Yes' if result.get('moderation_flagged', False) else 'No' }}
+                        </div>
+                        
+                        {% if result.prompt and result.prompt.text %}
+                        <div class="prompt-text-full">
+                            <strong>Full Prompt:</strong><br>
+                            {{ result.prompt.text }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.response %}
+                        <div class="response-text">
+                            <strong>Model Response:</strong><br>
+                            {{ result.response }}
+                        </div>
+                        {% elif result.get('error') %}
+                        <div class="error-text">
+                            <strong>Error:</strong> {{ result.error }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         
         <div class="footer">
             <p>Report generated by <strong>GuardRail AI v0.1.0</strong> | 

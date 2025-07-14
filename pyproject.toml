@@ -6,10 +6,30 @@ build-backend = "setuptools.build_meta"
 name = "guardrail-ai"
 version = "0.1.0"
 description = "Open-source Python CLI + CI tool that evaluates large language model (LLM) endpoints for jailbreak susceptibility and EU AI Act compliance"
-authors = [{name = "Your Name", email = "your.email@example.com"}]
+authors = [{name = "Taif Hassan", email = "taif@taifbuilds.com"}]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
+keywords = [
+    "ai", "llm", "security", "jailbreak", "eu-ai-act", 
+    "compliance", "testing", "cli", "cicd", "guardrails"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Environment :: Console",
+]
 dependencies = [
     "typer[all]>=0.9.0",
     "requests>=2.25.0",
@@ -17,9 +37,85 @@ dependencies = [
     "jinja2>=3.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "responses>=0.23.0",
+]
+
 [project.scripts]
 guardrail-ai = "guardrail_ai.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/GuardrailAI"
-Repository = "https://github.com/yourusername/GuardrailAI"
+Homepage = "https://github.com/taifbuilds/GuardRailAI"
+Repository = "https://github.com/taifbuilds/GuardRailAI"
+Issues = "https://github.com/taifbuilds/GuardRailAI/issues"
+Documentation = "https://github.com/taifbuilds/GuardRailAI/wiki"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.coverage.run]
+source = ["guardrail_ai"]
+omit = ["*/tests/*", "*/test_*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

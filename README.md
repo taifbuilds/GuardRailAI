@@ -11,6 +11,16 @@
 
 GuardRail AI helps organizations assess their AI systems against harmful prompts, jailbreak attempts, and regulatory compliance requirements through automated testing and comprehensive reporting.
 
+## 🔮 Vision and Future Use
+
+**GuardRail AI is positioned to become the essential compliance evaluation layer for any engineering team deploying generative AI systems into the EU market.** As the EU AI Act enforcement begins in August 2025, organizations will need to demonstrate due diligence in AI safety and responsible deployment practices. GuardRail AI provides that critical verification layer, designed to integrate seamlessly into CI/CD pipelines and provide auditable evidence of safety testing.
+
+**The landscape of AI jailbreaks and safety risks evolves rapidly, and GuardRail AI is built to evolve with it.** Our roadmap includes expanding adapter coverage to support emerging LLM providers, implementing smarter refusal detection methods beyond simple string matching, and continuously updating our test suites to reflect the latest attack vectors discovered by the security research community. We're developing more sophisticated semantic analysis techniques to better understand when models truly refuse harmful requests versus when they superficially comply while still providing dangerous information.
+
+**Whether you're deploying customer-facing chatbots, internal AI assistants, or API services that incorporate generative AI, GuardRail AI serves as your first line of defense against compliance failures and safety incidents.** By integrating automated safety evaluation into your development workflow, you can catch potential issues before they reach production, demonstrate regulatory compliance to auditors, and build confidence in your AI systems' behavior. GuardRail AI transforms AI safety testing from a manual, error-prone process into a reliable, automated engineering practice.
+
+**The future of responsible AI deployment requires tooling that's as sophisticated as the systems we're trying to govern.** GuardRail AI is designed to be that tooling—professional, reliable, and constantly improving to meet the challenges of an AI-powered world.
+
 ## 🚀 Quick Start
 
 ```bash

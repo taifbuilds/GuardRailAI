@@ -49,16 +49,16 @@ def evaluate(
     Optionally generates HTML report and checks against thresholds.
     """
     from guardrail_ai.core import evaluate
-    
+
     # If HTML report not specified, auto-generate path
     if html_report is None and output_file.endswith('.json'):
         html_report = output_file.replace('.json', '.html')
-    
+
     exit_code = evaluate(
-        adapter, endpoint, auth_key, prompts_file, output_file, 
+        adapter, endpoint, auth_key, prompts_file, output_file,
         thresholds_file=thresholds_file, html_output_file=html_report
     )
-    
+
     # Exit with proper code for CI/CD integration
     if exit_code != 0:
         typer.echo("Evaluation failed to meet thresholds", err=True)
